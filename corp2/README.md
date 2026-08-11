@@ -51,7 +51,7 @@
 
 기존 샌드백처럼 고정된 위치만 반복 타격하는 방식에서 벗어나, 사용자별 도달 거리와 실제 타격 중심을 먼저 보정한 뒤 개인에게 맞는 미트 위치를 생성합니다. 훈련 중에는 Vision, Robot, Force, UI가 ROS 2를 통해 하나의 세션으로 동작하며, 타격 결과는 SQLite에 저장되고 코칭 리포트로 연결됩니다.
 
-현재 최종 통합본의 **실물 검증 우선 범위는 JAB / STRAIGHT**입니다. Hook / Uppercut 관련 코드와 파라미터는 보존되어 있지만, 최종 통합에서는 잽·스트레이트의 물리 검증을 먼저 완료하도록 범위를 제한했습니다.
+현재 최종 통합본의 **Production 물리 검증 우선 범위는 JAB / STRAIGHT**입니다. Hook / Uppercut 관련 코드와 파라미터는 보존되어 있지만, 이번 최종 통합에서 새로 구현·검증된 범위로 표현하지 않습니다.
 
 ### 핵심 기능
 
@@ -65,7 +65,7 @@
 - 개인 보정값 저장 후 **TRAINING_READY**
 - M0609 **BASE XZ Weaving**
 - Force 기반 **Hit Detection / Compliance / Rebound / Return**
-- Wake Word + Whisper STT 기반 **비접촉 훈련 제어**
+- Wake Word + OpenAI Whisper STT 기반 **비접촉 훈련 제어**
 - BEST / CHECK / 이전 기록 비교 및 **AI Coaching Report**
 
 ---
@@ -94,14 +94,14 @@
 ## 최종 실행 흐름
 
 <p align="center">
-  <img src="docs/images/ko_execution_sequence.png" width="100%" alt="K.O 전체 실행 시퀀스">
+  <a href="docs/images/ko_execution_sequence.png">
+    <img src="docs/images/ko_execution_sequence.png" width="100%" alt="K.O 전체 실행 시퀀스">
+  </a>
 </p>
 
-<p align="center">
-  <img src="docs/images/KO_flowchart.jpg" width="100%" alt="K.O 전체 통합 플로우차트">
-</p>
+K.O는 사용자 준비부터 개인별 보정, 실제 훈련, HitResult 저장과 코칭 리포트 생성까지를 하나의 세션 흐름으로 관리합니다.
 
-> 상세 모듈 내부 흐름은 위 통합 플로우차트에서 확인할 수 있습니다.
+특히 최종 시스템에서는 Guard `READY`만으로 훈련을 시작하지 않고, **1차 Reach Contact Calibration과 2차 5-Hit Force Centering을 모두 완료한 뒤 `TRAINING_READY` 상태가 확인되어야 실제 Countdown이 시작됩니다.**
 
 ### 실행 흐름에서 중요한 상태
 
@@ -113,6 +113,14 @@
 - 모든 보정이 끝난 경우에만 `TRAINING_READY`
 - UI Countdown은 `TRAINING_READY` 이후 시작
 - 훈련 종료 후 Force Session 종료 → Weaving Ready 복귀 → Weaving 재시작
+
+<p align="center">
+  <a href="docs/images/KO_flowchart.jpg">
+    <img src="docs/images/KO_flowchart.jpg" width="100%" alt="K.O 전체 통합 플로우차트">
+  </a>
+</p>
+
+> UI · Calibration · 실시간 Vision · Robot/Force 연동의 세부 흐름은 위 최종 통합 플로우차트에서 확인할 수 있습니다.
 
 ---
 
@@ -194,7 +202,7 @@ Vision은 **YOLO11n + BoT-SORT**와 **MediaPipe Pose**를 역할 분리하여 �
 
 ### Guard Ready
 
-Guard 판정은 Front MediaPipe 결과를 기준으로 합니다.
+Guard 판정은 Front MediaPipe 결과를 기준으로 하며, **Vision 내부에서 사용자의 자세가 안정적으로 준비되었는지 확인하는 상태**입니다.
 
 - 양 어깨 거리로 Body Scale 계산
 - 양 손목과 코 사이 거리 정규화
@@ -209,7 +217,10 @@ guard_max_speed_body_s     = 0.45
 guard_ready_frames         = 4
 ```
 
-즉 양손이 코 주변의 Guard 범위 안에 있고 손 움직임이 충분히 안정된 상태가 4프레임 유지되면 `READY`로 전환합니다.
+양손이 Guard 범위 안에 있고 손 움직임이 충분히 안정된 상태가 4프레임 유지되면 Vision 상태가 `READY`로 전환됩니다.
+
+> **주의:** `READY`는 Guard 판정 결과이며 실제 훈련 시작 신호와는 다릅니다.  
+> 실제 UI Countdown과 본 훈련은 **Reach Contact Calibration + 5-Hit Force Centering이 모두 끝난 뒤 SessionBridge가 `TRAINING_READY`를 발행했을 때** 시작됩니다.
 
 ### 3D Fist State
 
@@ -229,7 +240,7 @@ guard_ready_frames         = 4
 
 ### Training 중 Vision 사용
 
-최종 통합본은 보정이 끝난 뒤 Vision을 완전히 제거하지 않습니다.
+최종 통합본은 보정이 끝난 뒤에도 Vision을 유지합니다.
 
 훈련 중에도 `/sandbag/fist_state`가 **bounded punch-target predictor**에 입력되며, 예측 이동은 최대 허용 오프셋과 도달 시간 조건 안에서 제한됩니다. Force HitResult가 실제 접촉 판정의 기준으로 저장됩니다.
 
@@ -266,15 +277,8 @@ calibration_tools/
 
 ### M0609 기준 자세
 
-최종 통합 문서 기준:
-
-| 상태 | Joint Pose |
-|---|---|
-| HOME | `[0, 0, 90, 0, 90, 0]` |
-| Weaving Ready | `[-180, 0, 90, 90, 90, 0]` |
-| Punching Ready | `[-90, 60, 30, -90, -90, 0]` |
-
-Weaving Ready와 Punching Ready는 의도적으로 서로 다른 자세입니다.
+최종 통합에서는 **HOME / Weaving Ready / Punching Ready를 서로 다른 기준 상태로 분리**합니다.  
+특히 Weaving Ready와 실제 펀치 대응용 Punching Ready를 별도 Pose로 관리해, 대기 동작과 훈련 동작의 상태 소유권이 섞이지 않도록 구성했습니다.
 
 ### Weaving
 
@@ -301,14 +305,7 @@ RT Force Stack은 다음 기능을 포함합니다.
 - Return-to-reference
 - HitResult 기록
 
-주요 Force 파라미터 예:
-
-```text
-Hit start force       : 10 N
-Hit end force         : 5 N
-Minimum position force: 8 N
-Mitt size             : 190 × 150 mm
-```
+세부 Force Threshold와 Mitt 크기 등의 튜닝 값은 `force_control/boxing_robot_ws`의 파라미터 파일에서 관리합니다.
 
 Force / Compliance 관련 application watchdog는 실제 Doosan Controller의 Safety 기능을 대체하지 않습니다.
 
@@ -413,7 +410,7 @@ Force workspace에는 다음 패키지가 포함되어 있습니다.
 | Side Cameras | Logitech C270 × 2 |
 | Vision | YOLO11n, BoT-SORT, MediaPipe, OpenCV |
 | 3D / Filter | Triangulation, RealSense Depth, EKF |
-| Voice | openWakeWord, Whisper STT, Piper |
+| Voice | openWakeWord, OpenAI Whisper STT, Browser Speech Synthesis |
 | UI | Flask, HTML, CSS, JavaScript |
 | DB | SQLite |
 | AI Coaching | OpenAI Responses API (선택) |
