@@ -1,594 +1,685 @@
+<div align="center">
+
 # K.O — Intelligent Robotic Boxing Training System
 
-> **AI Vision · ROS 2 · Doosan M0609 · Force Control · Voice Interface · Web UI**  
-> 사용자의 움직임을 인식하고, 협동로봇 미트가 능동적으로 반응하며, 훈련 결과를 데이터로 피드백하는 **지능형 복싱 트레이닝 시스템**입니다.
+### AI Vision · ROS 2 · Doosan M0609 기반 지능형 복싱 트레이닝 시스템
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Ubuntu-22.04-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu 22.04" />
-  <img src="https://img.shields.io/badge/ROS%202-Humble-22314E?style=for-the-badge&logo=ros&logoColor=white" alt="ROS 2 Humble" />
-  <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10" />
-  <img src="https://img.shields.io/badge/Doosan-M0609-555555?style=for-the-badge&logoColor=white" alt="Doosan M0609" />
-</p>
+> 사용자 인식 → 개인별 미트 보정 → 로봇 반응 → 타격 분석 → 코칭 리포트
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Ultralytics-YOLO11-111F68?style=for-the-badge&logo=ultralytics&logoColor=white" alt="YOLO11" />
-  <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV" />
-  <img src="https://img.shields.io/badge/MediaPipe-Pose-0F9D58?style=for-the-badge&logo=google&logoColor=white" alt="MediaPipe Pose" />
-  <img src="https://img.shields.io/badge/Intel-RealSense-0071C5?style=for-the-badge&logo=intel&logoColor=white" alt="Intel RealSense" />
-</p>
+<br>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Whisper-STT-000000?style=for-the-badge&logo=openai&logoColor=white" alt="Whisper STT" />
-  <img src="https://img.shields.io/badge/Flask-Web%20UI-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
-  <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
-  <img src="https://img.shields.io/badge/GitHub-README%20Ready-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Ready" />
-</p>
+<img src="ui/static/images/robot_boxing_hero.png" width="86%" alt="K.O Robotic Boxing Training System">
+
+<br><br>
+
+![ROS 2](https://img.shields.io/badge/ROS%202-Humble-22314E?style=flat-square&logo=ros)
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=flat-square&logo=python&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-E95420?style=flat-square&logo=ubuntu&logoColor=white)
+![Robot](https://img.shields.io/badge/Robot-Doosan%20M0609-0078D4?style=flat-square)
+![YOLO](https://img.shields.io/badge/Vision-YOLO11n-111F68?style=flat-square)
+![MediaPipe](https://img.shields.io/badge/Pose-MediaPipe-0F9D58?style=flat-square)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.x-5C3EE8?style=flat-square&logo=opencv&logoColor=white)
+![Flask](https://img.shields.io/badge/Web-Flask-000000?style=flat-square&logo=flask)
+![SQLite](https://img.shields.io/badge/DB-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
+
+</div>
 
 ---
 
+## 목차
 
-## 1. Project Overview
-
-기존 샌드백은 정해진 위치를 반복 타격하는 수동적인 훈련에 가깝고, 실제 미트 훈련은 코치나 훈련 파트너가 필요합니다.  
-또한 혼자 훈련할 경우 자신의 자세와 타격 정확도를 객관적으로 확인하기 어렵다는 한계가 있습니다.
-
-**K.O**는 다음의 흐름을 하나의 시스템으로 연결하는 것을 목표로 합니다.
-
-```text
-사용자 인식
-    ↓
-펀치 / 자세 분석
-    ↓
-사용자 맞춤형 로봇 미트 제어
-    ↓
-실제 타격 및 Force 감지
-    ↓
-반발 / 복귀 / 다음 타점 전환
-    ↓
-훈련 데이터 저장 및 코칭 피드백
-```
-
-### 핵심 목표
-
-- 3-Camera 기반 사용자 및 주먹 추적
-- Robot BASE 기준 3D 주먹 위치·속도 산출
-- 사용자 키·리치·주손 기반 미트 위치 보정
-- 잽·스트레이트·훅·어퍼별 미트 위치/방향 제어
-- Force 기반 실제 타격 감지 및 Rebound/Return
-- Wake Word + STT 기반 비접촉 훈련 제어
-- 훈련 기록, BEST/CHECK, 이전 기록 비교 및 코칭 리포트
-- ROS 2 기반 Vision · Voice · UI · Robot · Force 통합
+1. [프로젝트 개요](#프로젝트-개요)
+2. [최종 시스템 구조](#최종-시스템-구조)
+3. [최종 실행 흐름](#최종-실행-흐름)
+4. [사용자 맞춤 보정](#사용자-맞춤-보정)
+5. [Vision](#vision)
+6. [Robot / Force](#robot--force)
+7. [UI · Voice · Coaching](#ui--voice--coaching)
+8. [ROS 2 통합 구조](#ros-2-통합-구조)
+9. [개발 환경](#개발-환경)
+10. [설치](#설치)
+11. [실행](#실행)
+12. [검증](#검증)
+13. [프로젝트 구조](#프로젝트-구조)
+14. [안전 및 물리 검증 범위](#안전-및-물리-검증-범위)
 
 ---
 
-## 2. Full System Flowchart
+## 프로젝트 개요
+
+**K.O**는 사용자의 신체 정보와 펀치 동작을 인식하고, Doosan M0609 협동로봇이 실제 미트처럼 반응하며, 훈련 결과를 저장·분석하는 지능형 복싱 트레이닝 시스템입니다.
+
+기존 샌드백처럼 고정된 위치만 반복 타격하는 방식에서 벗어나, 사용자별 도달 거리와 실제 타격 중심을 먼저 보정한 뒤 개인에게 맞는 미트 위치를 생성합니다. 훈련 중에는 Vision, Robot, Force, UI가 ROS 2를 통해 하나의 세션으로 동작하며, 타격 결과는 SQLite에 저장되고 코칭 리포트로 연결됩니다.
+
+현재 최종 통합본의 **실물 검증 우선 범위는 JAB / STRAIGHT**입니다. Hook / Uppercut 관련 코드와 파라미터는 보존되어 있지만, 최종 통합에서는 잽·스트레이트의 물리 검증을 먼저 완료하도록 범위를 제한했습니다.
+
+### 핵심 기능
+
+- RealSense + C270 × 2 기반 **3-Camera Vision**
+- YOLO11n + BoT-SORT 기반 **복서 ID 고정**
+- MediaPipe Pose 기반 **Guard / 손목·팔꿈치 추적**
+- Triangulation + RealSense Depth + EKF 기반 **Robot BASE 3D 위치·속도**
+- Guard 조건 충족 후 **READY 상태 전환**
+- 사용자별 **1차 Reach Contact Calibration**
+- Force HitResult 기반 **2차 5회 Mitt Center Calibration**
+- 개인 보정값 저장 후 **TRAINING_READY**
+- M0609 **BASE XZ Weaving**
+- Force 기반 **Hit Detection / Compliance / Rebound / Return**
+- Wake Word + Whisper STT 기반 **비접촉 훈련 제어**
+- BEST / CHECK / 이전 기록 비교 및 **AI Coaching Report**
+
+---
+
+## 최종 시스템 구조
 
 <p align="center">
-  <img src="./docs/images/KO_flowchart.jpg" alt="K.O 전체 시스템 플로우차트" width="100%">
+  <img src="docs/images/ko_system_architecture.png" width="100%" alt="K.O 전체 시스템 아키텍처">
 </p>
 
-> 위 플로우차트는 **UI / Calibration / 실시간 Vision / 분석·필터링 / Robot·Force 연동**의 전체 실행 흐름을 통합하여 표현합니다.
-
----
-
-## 3. System Architecture
-
-<p align="center">
-  <img src="./docs/images/ko_system_architecture.png" alt="K.O 전체 시스템 아키텍처" width="100%">
-</p>
-
-### SessionBridge
-
-최종 통합에서는 `SessionBridge`가 훈련 세션과 HitTest 흐름을 중심적으로 관리합니다.
-
-- 사용자별 미트 위치 요청
-- HitTest 시작/종료
-- `WAITING_FOR_HIT` 상태 동기화
-- 실제 HitResult 저장
-- Rebound/Return 종료 확인
-- 콤비네이션의 다음 타점 전환
-- 세션 불일치 및 중복 HitResult 차단
-
-특히 콤비네이션은 단순 타이머가 아니라 다음과 같은 **Event 기반 시퀀스**로 동작합니다.
-
-```text
-타점 A
-  ↓
-실제 타격 감지
-  ↓
-Rebound / Return 완료
-  ↓
-다음 사용자 맞춤 미트 Pose 생성
-  ↓
-HitTest 재시작
-  ↓
-WAITING_FOR_HIT
-  ↓
-타점 B 안내
-```
-
----
-
-## 4. Main Features
-
-| 영역 | 주요 기능 |
+| 구성 | 역할 |
 |---|---|
-| **UI** | 사용자 등록, 리치 측정, 훈련 선택, USER/ADMIN 모드, 결과 리포트 |
-| **Voice** | Custom Wake Word, Whisper STT, TTS/명령 구조화 |
-| **Vision** | 3-Camera 입력, 복서 ID 고정, Pose/Fist 추적, 삼각측량, EKF |
-| **Calibration** | 카메라 Intrinsic, Camera → Robot BASE 직접 정렬 |
-| **Robot** | M0609 위빙, 사용자 맞춤형 미트 위치, 펀치별 Orientation |
-| **Force** | RT 외력 감지, Hit 판정, Compliance, Rebound, Return |
-| **Combination** | 실제 타격 Event 기반 잽·스트레이트·훅·어퍼 시퀀스 |
-| **Report** | HitResult 저장, BEST/CHECK, 이전 기록 비교, 코칭 피드백 |
-| **Safety** | Hardware Preflight, Critical Node 감시, Stale 데이터 차단 |
+| **User UI** | 사용자 등록, 신체 정보, 리치 측정, 훈련 선택, 결과 표시 |
+| **Voice** | `Wake Up KO`, Whisper STT, TTS 안내 |
+| **Vision** | 3-Camera 입력, Person ID, Pose, 3D 좌표·속도, Guard 상태 |
+| **ROS 2 Core** | SessionBridge, Robot Bridge, Topic / Service, 상태 동기화 |
+| **Robot / Force** | M0609 Weaving, Mitt Positioner, RT Force, Hit / Rebound / Return |
+| **Training DB** | 사용자 정보, 리치·미트 보정값, 세션, HitResult 저장 |
+| **Coaching** | BEST / CHECK, 이전 세션 비교, 이미지 기반 코칭 리포트 |
+
+최종 구조의 중심은 `SessionBridge`입니다.  
+`/mitt/start_test`와 `/mitt/stop_test`의 소유자를 하나로 제한하고, 로봇 준비 상태, 두 단계의 사용자 보정, HitResult 저장과 다음 타점 진행을 하나의 상태 흐름으로 관리합니다.
 
 ---
 
-## 5. Vision Pipeline
+## 최종 실행 흐름
 
-Vision의 목표는 단순히 가장 정확한 Pose 모델을 사용하는 것이 아니라,
+```mermaid
+flowchart TD
+    A[run_final.sh 실행] --> B[Hardware Preflight]
+    B --> C[M0609 Weaving Ready]
+    C --> D[BASE XZ U형 Weaving]
+    D --> E[사용자 UI 훈련 시작]
+    E --> F[Front Camera 정렬 / 사용자 준비]
+    F --> G[training_start]
+    G --> H[Weaving Soft Stop]
+    H --> I[/robot_boxing/action_ready]
+    I --> J[Punching Ready / 사용자 기준 Mitt Pose]
 
-> **Stable ID · Low Latency · Robot-ready 3D Coordinate**
+    J --> K[1차 보정: Reach Contact]
+    K --> K1[비주손/Jab-side 팔을 끝까지 뻗고 정지]
+    K1 --> K2[Mitt Tool +Z 저속 접근]
+    K2 --> K3[Force Contact 위치 저장]
+    K3 --> L[접촉 해제 대기]
 
-를 확보하는 것입니다.
+    L --> M[2차 보정: 5-Hit Force Centering]
+    M --> M1[Wrench Zero Calibration]
+    M1 --> M2[유효 타격 1~5회]
+    M2 --> M3[hit_x_mm / hit_y_mm 기반 Mitt 보정]
+    M3 --> M4[Settled Pose 재획득 + Wrench Re-zero]
+    M4 -->|5회 미만| M2
+    M4 -->|5회 완료| N[개인 Mitt Correction DB 저장]
+
+    N --> O[TRAINING_READY]
+    O --> P[Countdown / 실제 훈련]
+    P --> Q[Vision bounded target predictor]
+    Q --> R[Force HitResult]
+    R --> S[Rebound / Return]
+    S -->|다음 타격| P
+    S -->|훈련 종료| T[Force Session Stop]
+    T --> U[Weaving Ready 복귀]
+    U --> V[Automatic Weaving Resume]
+    P --> W[훈련 데이터 / 사진 / 점수]
+    W --> X[SQLite Session 저장]
+    X --> Y[KO Coaching Report]
+```
+
+### 실행 흐름에서 중요한 상태
+
+- 카메라 정렬이 끝나기 전까지 Weaving 유지
+- `training_start` 이후 Weaving 정지
+- Robot Action Ready 이후 Punching Ready 이동
+- 1차 Reach Calibration 완료
+- 2차 5-Hit Calibration 완료
+- 모든 보정이 끝난 경우에만 `TRAINING_READY`
+- UI Countdown은 `TRAINING_READY` 이후 시작
+- 훈련 종료 후 Force Session 종료 → Weaving Ready 복귀 → Weaving 재시작
+
+---
+
+## 사용자 맞춤 보정
+
+최종 코드에서는 단순히 Vision으로 5개의 손 위치를 평균내는 방식이 아니라 **Force까지 포함한 2단계 사용자 보정**을 사용합니다.
+
+### 1차 — Reach Contact Calibration
+
+사용자는 **주손 반대쪽, 즉 Jab-side 팔**을 앞으로 끝까지 뻗고 정지합니다.
+
+로봇 미트는 현재 미트 면의 법선 방향인 **Tool +Z**를 따라 천천히 접근하며, 실제 Force Contact가 감지되는 위치를 사용자의 도달 거리 기준으로 저장합니다.
+
+```text
+Jab-side 팔 정지
+    ↓
+Force Baseline
+    ↓
+Mitt Tool +Z 저속 접근
+    ↓
+접촉 감지
+    ↓
+실제 Reach Correction 저장
+    ↓
+사용자 팔 / 미트 접촉 해제
+```
+
+### 2차 — Five-Hit Force Centering
+
+1차 보정 이후 실제 HitTest / Force / Compliance 세션을 활성화합니다.
+
+사용자가 미트를 5회 타격하면 각 타격의 Force 기반 접촉 위치인 `hit_x_mm`, `hit_y_mm`을 이용해 미트 중심을 보정합니다. 의도적인 로봇 이동은 Motion Guard로 구분하고, 각 보정 이동이 끝날 때마다 새로운 Settled Pose를 다시 잡고 Wrench Zero를 재보정합니다.
+
+```text
+Wrench Zero
+    ↓
+Punch #1
+    ↓
+Force Hit X/Y
+    ↓
+Mitt Center Correction
+    ↓
+Settled Pose + Re-zero
+    ↓
+...
+    ↓
+Punch #5
+    ↓
+최종 사용자 Mitt Correction 저장
+    ↓
+TRAINING_READY
+```
+
+사용자별 보정 결과는 SQLite의 `user_reach_calibrations`, `user_mitt_calibrations`에 저장됩니다.
+
+---
+
+## Vision
 
 ### Hybrid Tracking
 
-```text
-YOLO11n + BoT-SORT
-        ↓
-복서 Person ID 고정 / ROI 선택
-        ↓
-MediaPipe Pose
-        ↓
-손목·팔꿈치 관절 추론
-        ↓
-LEFT / FRONT / RIGHT 촬영 시각 정렬
-        ↓
-2대 이상 카메라 기반 3D Triangulation
-        ↓
-RealSense Depth 비교 / 보조
-        ↓
-EKF Position + Velocity Tracking
-        ↓
-Robot BASE 3D 좌표 발행
-```
+Vision은 **YOLO11n + BoT-SORT**와 **MediaPipe Pose**를 역할 분리하여 사용합니다.
 
-### 왜 Hybrid 구조인가?
-
-- **MediaPipe 단독**
-  - 빠른 관절 추론
-  - 지속적인 Person ID가 없어 가림/다중 인물 상황에서 대상 전환 가능
-
-- **YOLO11n + BoT-SORT 단독**
-  - 안정적인 Track ID
-  - 3대 카메라에서 Pose까지 동시에 처리하면 연산 부하 증가
-
-- **최종 구조**
-  - YOLO + BoT-SORT: **사용자 ID 고정**
-  - MediaPipe: **ROI 내부의 빠른 관절 추론**
-  - Latest Frame 처리: **오래된 프레임 누적 방지**
-
-### EKF
-
-EKF는 손목 위치와 속도를 동시에 추정하여 카메라 노이즈와 순간적인 좌표 튐을 완화합니다.
-
-```text
-3D 측정값
-   ↓
-이전 위치 + 속도 기반 상태 예측
-   ↓
-실제 측정값과 결합
-   ↓
-Innovation Outlier 제거
-   ↓
-Stale 데이터 차단
-   ↓
-최종 Position / Velocity
-```
-
----
-
-## 6. Camera ↔ Robot Calibration
-
-세 카메라를 카메라끼리 Pairwise 방식으로 연쇄 연결하지 않고,  
-각 카메라를 **Robot BASE에 직접 1:1 정렬**하는 구조를 사용합니다.
-
-```text
-Front Camera ─────┐
-Left Camera  ─────┼──→ Robot BASE
-Right Camera ─────┘
-```
-
-### 처리 과정
-
-1. 카메라별 Intrinsic Calibration
-2. ChArUco 보드를 로봇 Flange에 장착
-3. 여러 Robot Pose에서 동시 데이터 수집
-   - `T_base_flange`
-   - `T_cam_board`
-4. 복수 샘플의 위치·회전 오차 최소화
-5. 카메라별 `T_base_camera` 산출
-6. 최종 3D 좌표를 Robot BASE로 통합
-
-### 주요 파일
-
-```text
-calibration/
-├── intrinsics/
-│   ├── front.yaml
-│   ├── left.yaml
-│   └── right.yaml
-└── results/
-    └── robot_world.yaml
-```
-
----
-
-## 7. Robot Mitt Control
-
-### Weaving Idle Motion
-
-훈련 대기 중에는 로봇이 정지 상태로만 기다리지 않고 복싱의 회피 동작인 **위빙(Weaving)**을 수행합니다.
-
-```text
-HOME
-  ↓
-MITT / WEAVE Ready
-  ↓
-Weaving Idle Motion
-  ↓
-Wake Word / Training Command
-  ↓
-Soft Stop
-  ↓
-Training Ready
-```
-
-### User-specific Mitt Pose
-
-사용자의 신체 정보를 기준으로 로봇 미트의 위치를 재계산합니다.
-
-입력:
-
-- 키
-- 좌/우 리치
-- 주손
-- 훈련 종류
-- 펀치 종류
-
-출력:
-
-```text
-Target Pose = [X, Y, Z, A, B, C]
-```
-
-### Punch Orientation
-
-| 펀치 | 미트 제어 |
-|---|---|
-| **JAB / STRAIGHT** | 정면 타격면 유지 |
-| **HOOK** | 측면 위치 이동 + Yaw 회전 |
-| **UPPERCUT** | 상향 진입 방향에 맞춰 미트 각도 변경 |
-
----
-
-## 8. Force / Hit / Rebound
-
-로봇 외력을 실시간으로 모니터링하여 실제 타격을 감지합니다.
-
-```text
-WAITING
-  ↓
-Force / Moment Monitoring
-  ↓
-HIT DETECTION
-  ↓
-Impact Analysis
-  ↓
-REBOUND
-  ↓
-RETURN
-  ↓
-WAITING_FOR_HIT
-```
-
-주요 처리 항목:
-
-- 실시간 외력 측정
-- Peak Force
-- Impulse
-- Contact Time
-- 타격 위치 추정
-- Center Error
-- HitResult 저장
-- Compliance / Rebound / Return
-
----
-
-## 9. User Training Flow
-
-<p align="center">
-  <img src="./docs/images/ko_execution_sequence.png" alt="K.O 전체 실행 시퀀스" width="100%">
-</p>
-
----
-
-## 10. Hardware
-
-| 장치 | 구성 |
-|---|---|
-| Collaborative Robot | **Doosan M0609** |
-| Front Camera | **Intel RealSense D435/D435i RGB + Depth** |
-| Side Cameras | **Logitech C270 × 2** |
-| End Effector | 평면 복싱 미트 + 전용 Tool Adapter |
-| Audio | Microphone |
-| Control PC | Ubuntu 22.04 / ROS 2 Humble 환경 |
-
-기본 카메라 Runtime 해상도:
-
-```text
-640 × 480 @ 30 FPS
-```
-
----
-
-## 11. Software Stack
-
-### Platform
-
-- Ubuntu 22.04
-- ROS 2 Humble
-- Python 3.10
-
-### AI / Vision
-
-- YOLO11n
-- BoT-SORT
+- YOLO11n + BoT-SORT
+  - 복서 탐지
+  - Person ID 고정
+  - ROI 선택
 - MediaPipe Pose
-- OpenCV
-- Intel RealSense SDK
-- NumPy / SciPy
+  - 손목 / 팔꿈치 / 어깨 / 코 관절 추론
+  - Guard 판정
+  - 3D Triangulation 입력 생성
+- RealSense Depth
+  - BASE 영역 기반 타겟 필터
+  - 3D 결과 비교·보조
 - EKF
+  - 3D 위치 + 속도 추정
+  - Outlier 제거
+  - Stale 좌표 차단
 
-### Voice
+### Guard Ready
 
-- openWakeWord
-- Whisper STT
-- Piper / TTS
+Guard 판정은 Front MediaPipe 결과를 기준으로 합니다.
 
-### UI / Data
+- 양 어깨 거리로 Body Scale 계산
+- 양 손목과 코 사이 거리 정규화
+- 손목 속도 확인
+- 조건을 연속 프레임 동안 유지
 
-- Flask
-- HTML / CSS / JavaScript
-- SQLite
-
-### Robot / Force
-
-- Doosan ROS 2
-- M0609 Motion Control
-- RT Force
-- Compliance / Rebound / Return
-
----
-
-## 12. Repository Structure
+현재 `config/runtime.yaml` 기준:
 
 ```text
-KO/
-├── calibration/             # 최종 Intrinsic / Robot World 결과
-├── calibration_tools/       # 카메라 및 Robot BASE 캘리브레이션 도구
-├── config/                  # Camera / Runtime / Mitt 설정
-├── data/                    # 훈련 및 Hit 기록
-├── force_control/
-│   └── boxing_robot_ws/     # ROS 2 Force / Hit / SessionBridge Workspace
-├── interfaces/              # 인터페이스 정의
-├── models/                  # Vision 관련 모델
-├── msg/                     # 메시지 스키마
-├── output/
-│   └── impacts/             # 타격 이미지 및 Metadata
-├── robot_control/           # M0609 Weaving / UI-Robot Bridge
-├── sandbag_vision/          # 실시간 3-Camera Vision Runtime
-├── tests/                   # 통합 테스트
-├── tools/                   # Preflight / Configuration 검사
-├── ui/                      # Flask UI / Voice / Reporting / DB
-├── setup.sh
-├── run_final.sh
-├── test_final.sh
-├── stop_final.sh
-├── FINAL_INTEGRATION.md
-└── FINAL_TEST_REPORT.md
+guard_max_wrist_nose_ratio = 1.85
+guard_max_speed_body_s     = 0.45
+guard_ready_frames         = 4
 ```
 
----
+즉 양손이 코 주변의 Guard 범위 안에 있고 손 움직임이 충분히 안정된 상태가 4프레임 유지되면 `READY`로 전환합니다.
 
-## 13. Setup
+### 3D Fist State
 
-> 권장 환경: **Ubuntu 22.04 + ROS 2 Humble + Python 3.10**
+3대 카메라 관측 중 최소 2대를 사용해 강건 삼각측량을 수행하고, 필요 시 RealSense Depth를 약하게 융합합니다.
 
-프로젝트 루트에서 실행합니다.
-
-```bash
-chmod +x setup.sh run_final.sh test_final.sh stop_final.sh
-./setup.sh --build-force
-```
-
-`setup.sh`는 Vision/UI 환경을 준비하고, `--build-force` 옵션을 사용하면 번들된 Force ROS 2 workspace도 함께 빌드합니다.
-
----
-
-## 14. Preflight / Verification
-
-### Software Test
-
-실제 장비 I/O 및 로봇 모션 없이 소프트웨어 구조를 검사합니다.
-
-```bash
-./test_final.sh
-```
-
-현재 최종 통합본의 자동 검증 범위:
+주요 ROS 출력:
 
 ```text
-Final Integration Contract      PASS
-Python Syntax                   105 files / 0 errors
-YAML Parse                       15 files / 0 errors
-UI / API                         42 / 42 PASS
-Force / Rebound / Mitt Logic     94 / 94 PASS
-Vision Core                      16 / 16 PASS
+/sandbag/fist_state
+/sandbag/fist_position_base_mm/left
+/sandbag/fist_position_base_mm/right
+/sandbag/fist_velocity_base_mm_s/left
+/sandbag/fist_velocity_base_mm_s/right
 ```
 
-### Hardware Preflight
+로봇 측에서는 단순 좌표만 사용하지 않고 `valid`, `measurement_age_ms`, `position_std_mm` 등의 상태를 함께 확인해야 합니다.
 
-실제 카메라·마이크·ROS·Doosan 서비스 연결을 검사하지만,  
-**프로젝트 로봇 모션은 실행하지 않습니다.**
+### Training 중 Vision 사용
 
-```bash
-./test_final.sh --hardware
-```
+최종 통합본은 보정이 끝난 뒤 Vision을 완전히 제거하지 않습니다.
 
-주요 검사:
-
-- C270 LEFT / RIGHT 물리 장치 매핑
-- RealSense RGB + Depth
-- 640×480 유효 프레임 수신
-- 마이크 입력
-- Wake Word 모델 초기화
-- ROS 2 / Doosan 필수 서비스
-- Force workspace overlay
-
-하드웨어 프리플라이트에 실패하면 `run_final.sh`의 실제 프로젝트 동작 시작이 차단됩니다.
+훈련 중에도 `/sandbag/fist_state`가 **bounded punch-target predictor**에 입력되며, 예측 이동은 최대 허용 오프셋과 도달 시간 조건 안에서 제한됩니다. Force HitResult가 실제 접촉 판정의 기준으로 저장됩니다.
 
 ---
 
-## 15. Run
+## Camera ↔ Robot Calibration
 
-> 실제 실행 전 `roboton` 및 Doosan 관련 서비스가 정상 준비되어 있어야 합니다.
+카메라 간 Pairwise 변환 체인을 만들지 않고, 각 카메라를 **Robot BASE에 직접 정렬**합니다.
 
-### USER Mode
-
-```bash
-./run_final.sh
+```text
+Front RealSense ──┐
+Left C270 ────────┼──→ Robot BASE
+Right C270 ───────┘
 ```
 
-사용자 훈련 중심 화면으로 실행합니다.
+주요 도구:
 
-### ADMIN Mode
+```text
+calibration_tools/
+├── 00_check_cameras.py
+├── 01_intrinsic_calibration.py
+├── 02_collect_external_samples.py
+├── 03_solve_external_calibration.py
+├── 04_validate_robot_world.py
+├── 05_robot_world_transform.py
+└── 06_enable_manual_teaching.py
+```
+
+최종 결과는 `calibration/results/robot_world.yaml`을 기준으로 사용합니다. 카메라 위치·각도·장비가 변경되면 재검증이 필요합니다.
+
+---
+
+## Robot / Force
+
+### M0609 기준 자세
+
+최종 통합 문서 기준:
+
+| 상태 | Joint Pose |
+|---|---|
+| HOME | `[0, 0, 90, 0, 90, 0]` |
+| Weaving Ready | `[-180, 0, 90, 90, 90, 0]` |
+| Punching Ready | `[-90, 60, 30, -90, -90, 0]` |
+
+Weaving Ready와 Punching Ready는 의도적으로 서로 다른 자세입니다.
+
+### Weaving
+
+Weaving은 BASE `XZ` 평면에서 수행됩니다.
+
+- X: `-85 ~ +85 mm`
+- Z: `0 ~ -68 mm`
+- 상대 Y: `0`
+- U형 반복 경로
+- 카메라 정렬 / UI 준비 중 계속 수행
+- `training_start`에서 Soft Stop 후 로봇 제어를 SessionBridge에 인계
+
+### Force / Hit
+
+RT Force Stack은 다음 기능을 포함합니다.
+
+- RT wrench 읽기 및 frame correction
+- Wrench Zero Calibration
+- Hit Detection
+- Hit Point Estimation
+- Hit Score 계산
+- Compliance
+- Force-scaled Rebound
+- Return-to-reference
+- HitResult 기록
+
+주요 Force 파라미터 예:
+
+```text
+Hit start force       : 10 N
+Hit end force         : 5 N
+Minimum position force: 8 N
+Mitt size             : 190 × 150 mm
+```
+
+Force / Compliance 관련 application watchdog는 실제 Doosan Controller의 Safety 기능을 대체하지 않습니다.
+
+---
+
+## UI · Voice · Coaching
+
+### USER / ADMIN
+
+- USER
+  - 사용자 등록
+  - 리치 측정
+  - 훈련 선택
+  - 실시간 훈련
+  - 결과 리포트
+- ADMIN
+  - LEFT / FRONT / RIGHT 카메라
+  - Vision / Guard / Impact 상태
+  - Robot BASE P / V
+  - 시스템 진단 상태
+
+ADMIN 실행:
 
 ```bash
 ./run_final.sh --admin-mode
 ```
 
-ADMIN 화면에서는 다음 정보를 확인할 수 있습니다.
+### Voice
 
-- LEFT / FRONT / RIGHT Camera Preview
-- Pose / Guard / Impact 상태
-- Robot BASE Position / Velocity
-- 시스템 상태 및 개발 진단 정보
+실운영 `run_final.sh`에서는 Wake Word를 기본 활성화합니다.
 
-### Stop / Restart
+```text
+Wake Up KO
+    ↓
+Whisper STT
+    ↓
+훈련 명령
+    ↓
+UI / ROS 2 command
+```
+
+Wakeword 환경은 `./setup.sh` 과정에서 `ui/setup_ui.sh`를 통해 준비됩니다.
+
+### KO Coaching Report
+
+훈련 결과는 먼저 로컬 측정값으로 BEST / CHECK를 결정합니다.
+
+OpenAI 코칭을 사용하는 경우 대표 `impact_triptych.jpg` 중 **BEST PUNCH 1장 + CHECK POINT 1장**을 우선 사용하며, 이전 동일 훈련 결과와 함께 코칭 설명을 생성합니다.
+
+코칭 Prompt에는 **England Boxing Level 1 Coaching Handbook**의 간결한 참고 가이드를 포함하지만, 실제 측정 데이터와 이미지 증거를 우선하며 확인할 수 없는 동작을 임의로 추정하지 않도록 제한합니다.
+
+API 키 설정:
 
 ```bash
-./stop_final.sh
+python3 ui/configure_api_key.py
 ```
 
-비정상 종료 후 중복 실행이나 lock 문제가 발생하면 `stop_final.sh`로 KO 프로젝트 프로세스를 정리한 뒤 다시 실행합니다.
+키는 `ui/.env`에 저장되고 브라우저로 전달되지 않습니다. OpenAI 분석이 실패해도 훈련 결과 저장은 중단되지 않고 로컬 피드백으로 복귀합니다.
 
 ---
 
-## 16. Calibration Tools
+## ROS 2 통합 구조
 
-카메라 또는 설치 위치가 변경된 경우 재검증이 필요합니다.
+Force workspace에는 다음 패키지가 포함되어 있습니다.
+
+| Package | 역할 |
+|---|---|
+| `boxing_integration` | UI / Vision / Robot / Force를 연결하는 SessionBridge |
+| `boxing_interfaces` | 서비스·메시지 인터페이스 |
+| `mitt_hit_system` | Force, Hit, Compliance, Rebound, Mitt Positioner |
+| `mitt_hit_bringup` | 통합 Launch 및 파라미터 |
+
+### 최종 상태 소유권
+
+- `SessionBridge`
+  - Robot / Training State Owner
+  - StartHitTest / StopHitTest 단일 소유자
+  - 사용자 Reach / Mitt Calibration
+  - HitResult routing
+  - Next Target / Training Ready 관리
+
+- `robot_weaving_node.py`
+  - HOME / Weaving Ready
+  - BASE XZ Weaving
+  - Soft Stop
+  - `/robot_boxing/action_ready`
+
+- `ui_robot_bridge.py`
+  - UI Command Queue ↔ ROS Command / Status
+
+---
+
+## 개발 환경
+
+| 항목 | 내용 |
+|---|---|
+| OS | Ubuntu 22.04 |
+| ROS 2 | Humble |
+| Python | 3.10 |
+| Robot | Doosan M0609 |
+| Front Camera | Intel RealSense D435 / D435i |
+| Side Cameras | Logitech C270 × 2 |
+| Vision | YOLO11n, BoT-SORT, MediaPipe, OpenCV |
+| 3D / Filter | Triangulation, RealSense Depth, EKF |
+| Voice | openWakeWord, Whisper STT, Piper |
+| UI | Flask, HTML, CSS, JavaScript |
+| DB | SQLite |
+| AI Coaching | OpenAI Responses API (선택) |
+
+`setup.sh`는 NVIDIA GPU 존재 여부를 확인해 PyTorch CPU / CUDA 환경을 자동 선택합니다.
+
+---
+
+## 설치
+
+### 필수 시스템
+
+- Ubuntu 22.04
+- Python 3.10
+- ROS 2 Humble
+- `colcon`
+- RealSense SDK / udev
+- C270 V4L2 접근 권한
+- Doosan `roboton`, `dsr_msgs2`, `DR_init`, `DSR_ROBOT2`
+- GPU 사용 시 NVIDIA Driver
+
+기본 Ubuntu 패키지:
 
 ```bash
-python3 calibration_tools/00_check_cameras.py --assign-c270
-python3 calibration_tools/01_intrinsic_calibration.py --camera front
-python3 calibration_tools/02_collect_external_samples.py --camera front
-python3 calibration_tools/03_solve_external_calibration.py
-python3 calibration_tools/04_validate_robot_world.py --camera front
+sudo apt update
+sudo apt install -y \
+  python3 python3-venv python3-pip unzip v4l-utils \
+  libgl1 libglib2.0-0 portaudio19-dev
 ```
 
-상세 내용은 다음 문서를 참고합니다.
+### 프로젝트 환경 구성
+
+```bash
+chmod +x ./*.sh ui/*.sh robot_control/*.sh
+./setup.sh --build-force
+```
+
+CPU 강제:
+
+```bash
+./setup.sh --cpu --build-force
+```
+
+CUDA 강제:
+
+```bash
+./setup.sh --cuda --build-force
+```
+
+---
+
+## 실행
+
+### 1. 카메라 / 설정 확인
+
+```bash
+source /opt/ros/humble/setup.bash
+./.venv/bin/python tools/check_config.py
+./.venv/bin/python tools/assign_cameras.py
+```
+
+### 2. 실제 최종 통합 실행
+
+먼저 Doosan `roboton`과 필수 서비스가 정상 실행 중인지 확인합니다.
+
+USER Mode:
+
+```bash
+./run_final.sh
+```
+
+ADMIN Mode:
+
+```bash
+./run_final.sh --admin-mode
+```
+
+`run_final.sh`는 다음을 수행합니다.
+
+1. Wake Word 기본 활성화
+2. 중복 실행 Lock 검사
+3. Force workspace 경로 / build stamp 확인
+4. Force source 변경 시 자동 재빌드
+5. Hardware Preflight
+6. USER UI + Vision + Robot Weaving + Force / SessionBridge 통합 시작
+
+### 3. 개발용 부분 실행
+
+```bash
+# Vision
+./run_vision.sh
+
+# UI + Vision 중심 통합
+./run_integrated.sh
+
+# Force stack
+./force_control/run_force_stack.sh
+```
+
+종료:
+
+```bash
+./stop_all.sh
+```
+
+---
+
+## 검증
+
+### 최종 자동 검증 결과
+
+`FINAL_TEST_REPORT.md` 기준:
+
+| 검증 | 결과 |
+|---|---:|
+| Final Integration Contract | **PASS** |
+| UI/API + Force/Rebound/Mitt | **154 PASS + 18 subtests PASS** |
+| Vision ROS-independent Regression | **21 PASS** |
+| Python Compile | **PASS** |
+| YAML Parse | **15 files / 0 errors** |
+| ROS `package.xml` Parse | **4 files / 0 errors** |
+| JavaScript Syntax | **PASS** |
+
+Target PC에서:
+
+```bash
+./test_final.sh
+./test_final.sh --hardware
+```
+
+Hardware Preflight는 실제 프로젝트 Robot Motion을 실행하지 않고 다음 항목을 확인합니다.
+
+- C270 LEFT / RIGHT
+- RealSense RGB / Depth
+- 마이크 / Wake Word
+- ROS 2 Humble
+- Doosan 필수 Service
+- Force workspace overlay
+- 소프트웨어 회귀검사
+
+---
+
+## 프로젝트 구조
 
 ```text
-calibration_tools/README.md
+KO/
+├── calibration/                  # 최종 Robot-world / Intrinsic 결과
+├── calibration_tools/            # Camera ↔ Robot BASE Calibration
+├── config/                       # Vision / Camera / Mitt 설정
+├── force_control/
+│   └── boxing_robot_ws/
+│       └── src/
+│           ├── boxing_integration/
+│           ├── boxing_interfaces/
+│           ├── mitt_hit_bringup/
+│           └── mitt_hit_system/
+├── interfaces/                   # 프로젝트 인터페이스 정의
+├── models/                       # YOLO / MediaPipe 모델
+├── msg/                          # FistState schema
+├── robot_control/                # M0609 Weaving / UI-Robot Bridge
+├── sandbag_vision/               # 3-Camera Vision Runtime
+├── tests/                        # Vision 회귀 테스트
+├── tools/                        # Preflight / 설정 / 배포 도구
+├── ui/                           # Flask UI / Voice / Report / DB
+├── setup.sh
+├── preflight.sh
+├── run_final.sh                  # 최종 실행
+├── run_integrated.sh
+├── test_final.sh                 # 최종 검증
+├── stop_all.sh
+├── FINAL_INTEGRATION.md
+├── FINAL_TEST_REPORT.md
+└── DEPLOYMENT.md
 ```
+
+배포 파일 생성:
+
+```bash
+./tools/create_deploy_bundle.sh
+```
+
+실행 결과, 사용자 DB, API Key, Python 가상환경 및 빌드 산출물은 배포본에서 제외됩니다.
 
 ---
 
-## 17. Data / Output
+## 안전 및 물리 검증 범위
 
-### Impact Evidence
+자동 테스트와 Hardware Preflight는 **실제 로봇의 물리 안전성을 인증하지 않습니다.**
+
+최초 실제 장비 검증은 반드시 낮은 속도에서 다음 순서로 진행합니다.
 
 ```text
-output/impacts/
-└── impact_XXXXX_YYYYMMDD_HHMMSS_xxxxxx/
-    ├── left_raw.jpg
-    ├── front_raw.jpg
-    ├── right_raw.jpg
-    ├── left.jpg
-    ├── front.jpg
-    ├── right.jpg
-    ├── impact_triptych.jpg
-    └── impact_metadata.json
+BASE XZ Weaving
+    ↓
+Camera Alignment Handoff
+    ↓
+Punching Ready
+    ↓
+Reach Contact Calibration
+    ↓
+5-Hit / Wrench Zero Calibration
+    ↓
+JAB / STRAIGHT
+    ↓
+Training Stop
+    ↓
+Weaving Ready Return
 ```
 
-### Training / Hit Records
+특히 아래 항목은 Target Rig에서 직접 확인해야 합니다.
 
-```text
-data/hit_records/
-ui/instance/ko.sqlite3
-```
+- 실제 Mitt Face Tool +Z 접근 방향
+- Reach Contact Threshold / Release
+- 5-Hit 보정 방향과 보정량
+- 각 보정 이동 후 Wrench Zero 타이밍
+- Compliance / Rebound 체감
+- Vision Target Follow 범위
+- Collision Clearance
+- 정상 Stop → Weaving 복귀
 
----
-
-## 18. Safety Notes
-
-이 프로젝트는 사용자가 실제로 협동로봇의 미트를 타격하는 구조이므로,  
-소프트웨어 테스트 통과와 실제 물리 안전 검증을 반드시 구분해야 합니다.
-
-### 첫 실물 구동 권장 순서
-
-```text
-1. 작업영역에서 사람 제거
-2. HOME Pose 저속 확인
-3. MITT / WEAVE Ready Pose 확인
-4. Weaving 궤적 및 주변 기구 간섭 확인
-5. Wake Word Soft Stop 확인
-6. 단일 펀치 위치 이동 확인
-7. WAITING_FOR_HIT 상태 확인
-8. 약한 타격으로 Force / Rebound 확인
-9. 단일 펀치 검증 후 콤비네이션 진행
-```
-
-자동 테스트의 `PASS`는 소프트웨어 연결 계약과 로직이 준비되었다는 의미이며,  
-실제 사용자 거리, 기구 간섭, Compliance 체감, 반복 타격 안전성은 물리 환경에서 별도로 검증해야 합니다.
+> **현재 Production 검증 우선 범위: JAB / STRAIGHT**  
+> Hook / Uppercut은 코드와 파라미터를 유지하지만, 잽·스트레이트 물리 검증 완료 후 확장하는 것을 기준으로 합니다.
 
 ---
 
-## 19. Current Limitations & Future Work
+## 참고 문서
 
-- 카메라 설치 위치 변화에 따른 Calibration 재검증 필요
-- 고속 펀치 및 가림 환경에서 더 많은 사용자 데이터 검증 필요
-- 실제 M0609 반복 타격 안전성 데이터 추가 축적 필요
-- 훅/어퍼컷의 사용자별 세부 Target Pose 튜닝
-- 자세 점수 및 Force Accuracy 기반 Scoring 고도화
-- 장기 훈련 기록 및 관리자 분석 기능 고도화
-
----
-
-## 20. Team
-
-**Team E-3**
-
-- 정용준
-- 정진목
-- 김승주
-- 김윤식
+- [`FINAL_INTEGRATION.md`](FINAL_INTEGRATION.md) — 최종 통합 소유권·런타임 흐름
+- [`FINAL_TEST_REPORT.md`](FINAL_TEST_REPORT.md) — 최종 자동 검증 결과
+- [`DEPLOYMENT.md`](DEPLOYMENT.md) — 배포 및 설치
+- [`ui/README.md`](ui/README.md) — UI / OpenAI Coaching / Vision Bridge
+- [`calibration_tools/README.md`](calibration_tools/README.md) — Camera ↔ Robot Calibration
+- [`force_control/boxing_robot_ws/README_BOXING_BACKEND.md`](force_control/boxing_robot_ws/README_BOXING_BACKEND.md) — Force / Mitt Backend
 
 ---
 
-## 21. Project Summary
+## Project Summary
 
-> **K.O는 “움직임 인식 → 판단 → 물리 반응 → 데이터 피드백”을 하나의 ROS 2 기반 폐루프 시스템으로 연결한 사람 반응형 로봇 복싱 트레이닝 프로젝트입니다.**
+> **K.O는 3-Camera Vision으로 사용자를 인식하고, Force 기반 2단계 개인 미트 보정을 거쳐 Doosan M0609이 사용자에 맞게 반응하며, HitResult와 코칭 데이터를 하나의 ROS 2 세션으로 연결하는 지능형 로봇 복싱 트레이닝 시스템입니다.**
