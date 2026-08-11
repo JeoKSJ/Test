@@ -8,7 +8,7 @@
 
 <br>
 
-<img src="ui/static/images/robot_boxing_hero.png" width="86%" alt="K.O Robotic Boxing Training System">
+<img src="docs/images/robot_boxing_hero.png" width="86%" alt="K.O Robotic Boxing Training System">
 
 <br><br>
 
