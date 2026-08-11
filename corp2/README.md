@@ -3,7 +3,29 @@
 > **AI Vision · ROS 2 · Doosan M0609 · Force Control · Voice Interface · Web UI**  
 > 사용자의 움직임을 인식하고, 협동로봇 미트가 능동적으로 반응하며, 훈련 결과를 데이터로 피드백하는 **지능형 복싱 트레이닝 시스템**입니다.
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Ubuntu-22.04-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Ubuntu 22.04" />
+  <img src="https://img.shields.io/badge/ROS%202-Humble-22314E?style=for-the-badge&logo=ros&logoColor=white" alt="ROS 2 Humble" />
+  <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10" />
+  <img src="https://img.shields.io/badge/Doosan-M0609-555555?style=for-the-badge&logoColor=white" alt="Doosan M0609" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Ultralytics-YOLO11-111F68?style=for-the-badge&logo=ultralytics&logoColor=white" alt="YOLO11" />
+  <img src="https://img.shields.io/badge/OpenCV-Computer%20Vision-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white" alt="OpenCV" />
+  <img src="https://img.shields.io/badge/MediaPipe-Pose-0F9D58?style=for-the-badge&logo=google&logoColor=white" alt="MediaPipe Pose" />
+  <img src="https://img.shields.io/badge/Intel-RealSense-0071C5?style=for-the-badge&logo=intel&logoColor=white" alt="Intel RealSense" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Whisper-STT-000000?style=for-the-badge&logo=openai&logoColor=white" alt="Whisper STT" />
+  <img src="https://img.shields.io/badge/Flask-Web%20UI-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask" />
+  <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+  <img src="https://img.shields.io/badge/GitHub-README%20Ready-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Ready" />
+</p>
+
 ---
+
 
 ## 1. Project Overview
 
