@@ -97,47 +97,6 @@
   <img src="docs/images/ko_execution_sequence.png" width="100%" alt="K.O 전체 실행 시퀀스">
 </p>
 
-
-```mermaid
-flowchart TD
-    A[run_final.sh 실행] --> B[Hardware Preflight]
-    B --> C[M0609 Weaving Ready]
-    C --> D[BASE XZ U형 Weaving]
-    D --> E[사용자 UI 훈련 시작]
-    E --> F[Front Camera 정렬 / 사용자 준비]
-    F --> G[training_start]
-    G --> H[Weaving Soft Stop]
-    H --> I[/robot_boxing/action_ready]
-    I --> J[Punching Ready / 사용자 기준 Mitt Pose]
-
-    J --> K[1차 보정: Reach Contact]
-    K --> K1[비주손/Jab-side 팔을 끝까지 뻗고 정지]
-    K1 --> K2[Mitt Tool +Z 저속 접근]
-    K2 --> K3[Force Contact 위치 저장]
-    K3 --> L[접촉 해제 대기]
-
-    L --> M[2차 보정: 5-Hit Force Centering]
-    M --> M1[Wrench Zero Calibration]
-    M1 --> M2[유효 타격 1~5회]
-    M2 --> M3[hit_x_mm / hit_y_mm 기반 Mitt 보정]
-    M3 --> M4[Settled Pose 재획득 + Wrench Re-zero]
-    M4 -->|5회 미만| M2
-    M4 -->|5회 완료| N[개인 Mitt Correction DB 저장]
-
-    N --> O[TRAINING_READY]
-    O --> P[Countdown / 실제 훈련]
-    P --> Q[Vision bounded target predictor]
-    Q --> R[Force HitResult]
-    R --> S[Rebound / Return]
-    S -->|다음 타격| P
-    S -->|훈련 종료| T[Force Session Stop]
-    T --> U[Weaving Ready 복귀]
-    U --> V[Automatic Weaving Resume]
-    P --> W[훈련 데이터 / 사진 / 점수]
-    W --> X[SQLite Session 저장]
-    X --> Y[KO Coaching Report]
-```
-
 <p align="center">
   <img src="docs/images/KO_flowchart.jpg" width="100%" alt="K.O 전체 통합 플로우차트">
 </p>
