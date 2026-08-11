@@ -93,6 +93,11 @@
 
 ## 최종 실행 흐름
 
+<p align="center">
+  <img src="docs/images/ko_execution_sequence.png" width="100%" alt="K.O 전체 실행 시퀀스">
+</p>
+
+
 ```mermaid
 flowchart TD
     A[run_final.sh 실행] --> B[Hardware Preflight]
@@ -132,6 +137,12 @@ flowchart TD
     W --> X[SQLite Session 저장]
     X --> Y[KO Coaching Report]
 ```
+
+<p align="center">
+  <img src="docs/images/KO_flowchart.jpg" width="100%" alt="K.O 전체 통합 플로우차트">
+</p>
+
+> 상세 모듈 내부 흐름은 위 통합 플로우차트에서 확인할 수 있습니다.
 
 ### 실행 흐름에서 중요한 상태
 
